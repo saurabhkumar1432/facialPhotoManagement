@@ -15,6 +15,8 @@ jobs:
   build:
     name: Build Release APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases and pushing tags
     
     steps:
       - name: Checkout repository
