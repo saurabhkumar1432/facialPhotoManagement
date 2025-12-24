@@ -134,7 +134,7 @@ fun PhotoViewerScreen(
                     )
                     if (uiState.photos.isNotEmpty()) {
                         Text(
-                            text = com.example.facialrecognition.util.DateUtils.formatDate(uiState.photos[localPagerState.currentPage].dateAdded * 1000L),
+                            text = com.example.facialrecognition.util.DateUtils.formatDate(uiState.photos[localPagerState.currentPage].dateAdded),
                             color = Color.White.copy(alpha = 0.7f),
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -162,23 +162,37 @@ fun ZoomableImage(
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
+    // Only enable zoom/pan transformations when the image is zoomed in
+    // This allows the HorizontalPager to receive swipe gestures when not zoomed
     val state = rememberTransformableState { zoomChange, offsetChange, _ ->
-        scale = (scale * zoomChange).coerceIn(1f, 3f)
-        val extraWidth = (scale - 1) * 1000 // Approximate width constraint
-        val extraHeight = (scale - 1) * 1000 
+        val newScale = (scale * zoomChange).coerceIn(1f, 3f)
         
-        // Simple bounds check (can be improved)
-        if (scale > 1f) {
-             offset += offsetChange
+        // Only apply offset changes when zoomed in
+        if (newScale > 1f) {
+            scale = newScale
+            offset += offsetChange
         } else {
-             offset = Offset.Zero
+            scale = newScale
+            offset = Offset.Zero
         }
     }
 
+    // Reset zoom on double tap
     Box(
         modifier = modifier
-            .clipToBounds() // Ensure content doesn't overflow when zoomed
-            .transformable(state = state)
+            .clipToBounds()
+            // Only apply transformable when zoomed in to allow swipe through when not zoomed
+            .then(
+                if (scale > 1f) {
+                    Modifier.transformable(state = state)
+                } else {
+                    // When not zoomed, only handle pinch gestures (multi-touch)
+                    Modifier.transformable(
+                        state = state,
+                        lockRotationOnZoomPan = true
+                    )
+                }
+            )
     ) {
         AsyncImage(
             model = imageUrl,

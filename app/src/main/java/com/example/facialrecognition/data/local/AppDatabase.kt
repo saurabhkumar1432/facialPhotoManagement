@@ -12,7 +12,7 @@ import com.example.facialrecognition.data.local.entity.Face
 import com.example.facialrecognition.data.local.entity.Person
 import com.example.facialrecognition.data.local.entity.Photo
 
-@Database(entities = [Photo::class, Face::class, Person::class], version = 2, exportSchema = false)
+@Database(entities = [Photo::class, Face::class, Person::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
