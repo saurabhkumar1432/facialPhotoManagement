@@ -1,5 +1,7 @@
 package com.example.facialrecognition.ui.progress
 
+import com.example.facialrecognition.data.local.dao.FaceWithPhoto
+
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +19,8 @@ data class ProgressUiState(
     val processedPhotoCount: Int = 0,
     val faceCount: Int = 0,
     val peopleCount: Int = 0,
-    val isScanning: Boolean = false
+    val isScanning: Boolean = false,
+    val recentFaces: List<FaceWithPhoto> = emptyList()
 )
 
 class ProgressViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,14 +36,24 @@ class ProgressViewModel(application: Application) : AndroidViewModel(application
         photoDao.getProcessedPhotoCount(),
         faceDao.getFaceCount(),
         personDao.getPeopleCount(),
+        faceDao.getRecentFaces(10),
         _isScanning
-    ) { photoCount, processedCount, faceCount, peopleCount, isScanning ->
+    ) { values ->
+        val photoCount = values[0] as Int
+        val processedCount = values[1] as Int
+        val faceCount = values[2] as Int
+        val peopleCount = values[3] as Int
+        @Suppress("UNCHECKED_CAST")
+        val recentFaces = values[4] as List<FaceWithPhoto>
+        val isScanning = values[5] as Boolean
+
         ProgressUiState(
             totalPhotoCount = photoCount,
             processedPhotoCount = processedCount,
             faceCount = faceCount,
             peopleCount = peopleCount,
-            isScanning = isScanning
+            isScanning = isScanning,
+            recentFaces = recentFaces
         )
     }.stateIn(
         scope = viewModelScope,

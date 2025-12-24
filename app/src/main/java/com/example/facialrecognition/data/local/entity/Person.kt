@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class Person(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String = "Unknown",
-    val coverPhotoId: Long? = null // ID of the representative photo/face
+    val coverPhotoId: Long? = null, // ID of the representative photo/face
+    val avatarUri: String? = null // URI of the cropped face thumbnail
 )

@@ -1,27 +1,32 @@
 package com.example.facialrecognition.ui.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,433 +37,412 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.example.facialrecognition.R
 import com.example.facialrecognition.data.local.entity.Person
 import com.example.facialrecognition.data.local.entity.Photo
+import com.example.facialrecognition.ui.theme.Dimens
+import com.example.facialrecognition.ui.theme.PrimaryBlue
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onPersonClick: (Long) -> Unit,
+    onAllPhotosClick: () -> Unit,
+    onPhotoClick: (Long) -> Unit,
+    onSearchClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     viewModel: MainViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        "Photo Manager",
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Stats Cards Section
-            StatsSection(
-                photoCount = uiState.photoCount,
-                peopleCount = uiState.peopleCount,
-                faceCount = uiState.faceCount,
-                processedPhotoCount = uiState.processedPhotoCount
-            )
-
-            // Scan Progress Section
-            if (uiState.photoCount > 0 && uiState.processedPhotoCount < uiState.photoCount) {
-                ScanProgressSection(
-                    progress = uiState.scanProgress,
-                    progressPercent = uiState.scanProgressPercent,
-                    processedCount = uiState.processedPhotoCount,
-                    totalCount = uiState.photoCount
-                )
-            }
-
-            // Recent Photos Section
-            RecentPhotosSection(
-                photos = uiState.recentPhotos
-            )
-
-            // People Section
-            PeopleSection(
-                people = uiState.people,
-                onPersonClick = onPersonClick,
-                hasPhotos = uiState.photoCount > 0,
-                isScanning = uiState.processedPhotoCount < uiState.photoCount
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-fun StatsSection(
-    photoCount: Int,
-    peopleCount: Int,
-    faceCount: Int,
-    processedPhotoCount: Int
-) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.surface
-                    )
-                )
-            )
-            .padding(16.dp)
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
     ) {
-        Text(
-            text = "Welcome to Photo Manager",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        
-        Text(
-            text = "Organize your photos by the people in them",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                icon = Icons.Default.Info,
-                label = "Photos",
-                value = photoCount.toString(),
-                modifier = Modifier.weight(1f),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-            StatCard(
-                icon = Icons.Default.Person,
-                label = "People",
-                value = peopleCount.toString(),
-                modifier = Modifier.weight(1f),
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-            )
-            StatCard(
-                icon = Icons.Default.Face,
-                label = "Faces",
-                value = faceCount.toString(),
-                modifier = Modifier.weight(1f),
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        }
-    }
-}
-
-@Composable
-fun StatCard(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun ScanProgressSection(
-    progress: Float,
-    progressPercent: Int,
-    processedCount: Int,
-    totalCount: Int
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Scanning Photos...",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "$progressPercent%",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = "$processedCount of $totalCount photos processed",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun RecentPhotosSection(photos: List<Photo>) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
+        // Top App Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Recent Photos",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(Dimens.AvatarSizeSmall)
+                        .clip(CircleShape)
+                        .background(PrimaryBlue.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PhotoLibrary,
+                        contentDescription = null,
+                        tint = PrimaryBlue,
+                        modifier = Modifier.size(Dimens.IconSizeMedium)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.app_title),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)) {
+                IconButton(
+                    onClick = onSearchClick,
+                    modifier = Modifier
+                        .size(Dimens.AvatarSizeSmall)
+                        .clip(CircleShape)
+                        .background(Color.Transparent)
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_desc), tint = MaterialTheme.colorScheme.onBackground)
+                }
+                IconButton(
+                    onClick = onSettingsClick,
+                    modifier = Modifier
+                        .size(Dimens.AvatarSizeSmall)
+                        .clip(CircleShape)
+                        .background(Color.Transparent)
+                ) {
+                    Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_desc), tint = MaterialTheme.colorScheme.onBackground)
+                }
+            }
         }
 
-        if (photos.isEmpty()) {
-            EmptyStateCard(
-                icon = Icons.Outlined.Info,
-                title = "No photos yet",
-                message = "Grant storage access to scan your device for photos"
-            )
-        } else {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(photos) { photo ->
-                    Card(
-                        modifier = Modifier.size(100.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(bottom = Dimens.BottomNavHeight), // Space for bottom nav
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge),
+            modifier = Modifier.padding(horizontal = Dimens.PaddingExtraLarge)
+        ) {
+            // Privacy Indicator
+            item(span = { GridItemSpan(2) }) {
+                Row(
+                    modifier = Modifier.padding(vertical = Dimens.PaddingLarge)
+                ) {
+                    Surface(
+                        color = PrimaryBlue.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(Dimens.CornerRadiusRound),
                     ) {
-                        AsyncImage(
-                            model = photo.uri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                        Row(
+                            modifier = Modifier.padding(horizontal = Dimens.PaddingLarge, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Shield,
+                                contentDescription = null, // Decorative
+                                tint = PrimaryBlue,
+                                modifier = Modifier.size(Dimens.IconSizeSmall)
+                            )
+                            Text(
+                                text = stringResource(R.string.privacy_indicator),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                                color = PrimaryBlue
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Stats Section
+            item(span = { GridItemSpan(2) }) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.library_stats),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(bottom = Dimens.PaddingLarge)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge)
+                    ) {
+                        StatItem(
+                            icon = Icons.Default.Image,
+                            value = "${uiState.photoCount}",
+                            label = stringResource(R.string.stat_photos),
+                            color = Color(0xFF3B82F6), // Blue-500
+                            onClick = onAllPhotosClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatItem(
+                            icon = Icons.Default.Group,
+                            value = "${uiState.peopleCount}",
+                            label = stringResource(R.string.stat_people),
+                            color = Color(0xFFA855F7), // Purple-500
+                            onClick = onSearchClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatItem(
+                            icon = Icons.Default.Face,
+                            value = "${uiState.faceCount}",
+                            label = stringResource(R.string.stat_faces),
+                            color = Color(0xFF10B981), // Emerald-500
+                            onClick = onSearchClick,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
+
+            // People Carousel
+            item(span = { GridItemSpan(2) }) {
+                Column(modifier = Modifier.padding(top = Dimens.PaddingDoubleLarge)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = Dimens.PaddingLarge),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.section_people_pets),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingExtraLarge),
+                        contentPadding = PaddingValues(bottom = Dimens.PaddingExtraLarge)
+                    ) {
+                        items(uiState.people) { person ->
+                            PersonAvatarItem(person = person, onClick = { onPersonClick(person.id) })
+                        }
+                    }
+                }
+            }
+
+            // Recent Highlights Header
+            item(span = { GridItemSpan(2) }) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Dimens.PaddingExtraLarge, bottom = Dimens.PaddingLarge),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.section_just_added),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    IconButton(onClick = { viewModel.toggleSortOrder() }) {
+                        Icon(
+                            imageVector = Icons.Default.Sort,
+                            contentDescription = stringResource(R.string.sort_desc), // "Sort"
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+
+
+            // Recent Photos Grid
+            if (uiState.recentPhotos.isNotEmpty()) {
+                // Large Item (First photo)
+                item(span = { GridItemSpan(2) }) {
+                    val photo = uiState.recentPhotos.first()
+                    Card(
+                        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.CardElevation),
+                        modifier = Modifier
+                            .aspectRatio(16f / 9f)
+                            .fillMaxWidth()
+                            .clickable { onPhotoClick(photo.id) }
+                    ) {
+                        Box {
+                            AsyncImage(
+                                model = photo.uri,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
+                                            startY = 300f
+                                        )
+                                    )
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(Dimens.PaddingExtraLarge)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.recent_photo_label),
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = if (uiState.recentPhotos.isNotEmpty()) {
+                                        com.example.facialrecognition.util.DateUtils.formatRelativeTime(uiState.recentPhotos.first().dateAdded * 1000L)
+                                    } else {
+                                        stringResource(R.string.just_now)
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Other photos
+                items(uiState.recentPhotos.drop(1).take(4)) { photo ->
+                    Card(
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clickable { onPhotoClick(photo.id) },
+                        shape = RoundedCornerShape(Dimens.CornerRadiusMedium),
+                        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.CardElevation)
+                    ) {
+                        AsyncImage(
+                            model = photo.uri,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
+
+            item(span = { GridItemSpan(2) }) {
+                Button(
+                    onClick = onAllPhotosClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Dimens.PaddingDoubleLarge),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(Dimens.BorderWidth, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Text(stringResource(R.string.view_all_photos))
+                }
+            }
         }
     }
 }
 
 @Composable
-fun PeopleSection(
-    people: List<Person>,
-    onPersonClick: (Long) -> Unit,
-    hasPhotos: Boolean,
-    isScanning: Boolean
+fun StatItem(
+    icon: ImageVector,
+    value: String,
+    label: String,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "People",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            if (people.isNotEmpty()) {
-                TextButton(onClick = { /* TODO: Navigate to all people view */ }) {
-                    Text("See All")
-                }
-            }
-        }
-
-        if (people.isEmpty()) {
-            val (title, message) = when {
-                !hasPhotos -> Pair(
-                    "No photos available",
-                    "Add photos to your device to start recognizing faces"
-                )
-                isScanning -> Pair(
-                    "Scanning for faces...",
-                    "We're analyzing your photos. People will appear here once detected"
-                )
-                else -> Pair(
-                    "No people found",
-                    "No faces were detected in your photos"
-                )
-            }
-            EmptyStateCard(
-                icon = Icons.Default.Person,
-                title = title,
-                message = message
-            )
-        } else {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(people) { person ->
-                    PersonCard(person = person, onClick = { onPersonClick(person.id) })
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun PersonCard(person: Person, onClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .width(100.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        modifier = modifier.clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier.padding(Dimens.PaddingLarge),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall)
         ) {
-            // Avatar placeholder with initials
             Box(
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(Dimens.IconSizeLarge)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(color.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = person.name.take(2).uppercase(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(18.dp) // Keep tiny icon size for now or param
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = person.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                textAlign = TextAlign.Center
+                text = value,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
 
 @Composable
-fun EmptyStateCard(
-    icon: ImageVector,
-    title: String,
-    message: String
-) {
-    Card(
+fun PersonAvatarItem(person: Person, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+            .width(Dimens.AvatarSizeLarge)
+            .clickable { onClick() }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
+                .size(Dimens.AvatarSizeLarge)
+                .clip(CircleShape)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(PrimaryBlue, Color(0xFFA855F7)) // Blue to Purple
+                    )
+                )
+                .padding(2.dp) // Border width
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
+            // Avatar Image (Placeholder for now if no image url in Person entity, assuming Person has uri or similar)
+            // Since Person entity might not have a cover photo URI readily available in this context without joining, 
+            // I'll use a placeholder or initials.
+            // Ideally, the ViewModel should provide a PersonUiModel with a cover photo.
+            
+            if (person.avatarUri != null) {
+                AsyncImage(
+                    model = person.avatarUri,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().clip(CircleShape)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = person.name.take(2).uppercase(),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
+        Text(
+            text = person.name,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }

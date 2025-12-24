@@ -58,6 +58,26 @@ class PersonDetailViewModel(
     fun clearSelection() {
         _uiState.update { it.copy(selectedPhotoIds = emptySet()) }
     }
+
+    fun deletePerson(onDeleted: () -> Unit) {
+        val currentPerson = uiState.value.person ?: return
+        viewModelScope.launch {
+            personDao.delete(currentPerson)
+            onDeleted()
+        }
+    }
+
+    fun renamePerson(newName: String) {
+        val currentPerson = uiState.value.person ?: return
+        if (newName.isBlank()) return
+        
+        viewModelScope.launch {
+            val updatedPerson = currentPerson.copy(name = newName)
+            personDao.update(updatedPerson)
+            // Update local state immediately
+            _uiState.update { it.copy(person = updatedPerson) }
+        }
+    }
     
     class Factory(private val app: Application, private val personId: Long) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

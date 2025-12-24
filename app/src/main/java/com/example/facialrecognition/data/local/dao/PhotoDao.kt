@@ -28,7 +28,7 @@ interface PhotoDao {
     @Query("SELECT * FROM photos WHERE uri = :uri LIMIT 1")
     suspend fun getPhotoByUri(uri: String): Photo?
 
-    @Query("SELECT photos.* FROM photos INNER JOIN faces ON photos.id = faces.photoId WHERE faces.personId = :personId")
+    @Query("SELECT photos.* FROM photos INNER JOIN faces ON photos.id = faces.photoId WHERE faces.personId = :personId ORDER BY photos.dateAdded DESC")
     suspend fun getPhotosForPerson(personId: Long): List<Photo>
 
     @Query("SELECT COUNT(*) FROM photos")
@@ -39,4 +39,7 @@ interface PhotoDao {
 
     @Query("SELECT * FROM photos ORDER BY dateAdded DESC LIMIT :limit")
     fun getRecentPhotos(limit: Int): Flow<List<Photo>>
+
+    @Query("UPDATE photos SET isProcessed = 0")
+    suspend fun resetProcessedStatus()
 }

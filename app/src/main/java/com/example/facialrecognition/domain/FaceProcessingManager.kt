@@ -115,12 +115,38 @@ class FaceProcessingManager(
             }
             
             // Set cover photo if none
+            // Set cover photo and avatar if none
             val personIndex = clusters.indexOfFirst { it.first.id == finalPersonId }
-            if (personIndex != -1 && clusters[personIndex].first.coverPhotoId == null) {
-                val existingPerson = clusters[personIndex].first
-                val updatedPerson = existingPerson.copy(coverPhotoId = faceId)
-                personDao.update(updatedPerson)
-                clusters[personIndex] = updatedPerson to clusters[personIndex].second
+            if (personIndex != -1) {
+                var existingPerson = clusters[personIndex].first
+                var needsUpdate = false
+                
+                if (existingPerson.coverPhotoId == null) {
+                    existingPerson = existingPerson.copy(coverPhotoId = faceId)
+                    needsUpdate = true
+                }
+                
+                if (existingPerson.avatarUri == null) {
+                    val avatarFile = java.io.File(context.filesDir, "avatars")
+                    if (!avatarFile.exists()) avatarFile.mkdirs()
+                    val destFile = java.io.File(avatarFile, "person_$finalPersonId.jpg")
+                    try {
+                        val out = java.io.FileOutputStream(destFile)
+                        faceBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                        out.flush()
+                        out.close()
+                        existingPerson = existingPerson.copy(avatarUri = destFile.absolutePath)
+                        needsUpdate = true
+                        Log.d(tag, "Saved avatar for person $finalPersonId at ${destFile.absolutePath}")
+                    } catch (e: Exception) {
+                        Log.e(tag, "Failed to save avatar", e)
+                    }
+                }
+
+                if (needsUpdate) {
+                    personDao.update(existingPerson)
+                    clusters[personIndex] = existingPerson to clusters[personIndex].second
+                }
             }
         }
         

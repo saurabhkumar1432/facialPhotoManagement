@@ -40,6 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val faceDao = database.faceDao()
 
     private val _isScanning = MutableStateFlow(false)
+    private val _sortOrder = MutableStateFlow(SortOrder.DATE_DESC)
     
     val uiState: StateFlow<HomeUiState> = combine(
         photoDao.getPhotoCount(),
@@ -48,15 +49,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         faceDao.getFaceCount(),
         photoDao.getRecentPhotos(6),
         personDao.getAllPeople(),
-        _isScanning
+        _isScanning,
+        _sortOrder
     ) { values ->
         @Suppress("UNCHECKED_CAST")
+        val photos = values[4] as List<Photo>
+        val sortOrder = values[7] as SortOrder
+        val sortedPhotos = if (sortOrder == SortOrder.DATE_DESC) photos else photos.sortedBy { it.dateAdded }
+
         HomeUiState(
             photoCount = values[0] as Int,
             processedPhotoCount = values[1] as Int,
             peopleCount = values[2] as Int,
             faceCount = values[3] as Int,
-            recentPhotos = values[4] as List<Photo>,
+            recentPhotos = sortedPhotos,
             people = values[5] as List<Person>,
             isScanning = values[6] as Boolean
         )
@@ -65,6 +71,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState()
     )
+
+
+    
+    fun toggleSortOrder() {
+        _sortOrder.value = if (_sortOrder.value == SortOrder.DATE_DESC) SortOrder.DATE_ASC else SortOrder.DATE_DESC
+    }
+
+    enum class SortOrder {
+        DATE_DESC, DATE_ASC
+    }
 
     // For backwards compatibility
     val people: StateFlow<List<Person>> = personDao.getAllPeople()

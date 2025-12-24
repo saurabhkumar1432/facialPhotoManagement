@@ -27,4 +27,19 @@ interface FaceDao {
 
     @Query("SELECT COUNT(*) FROM faces")
     fun getFaceCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM faces WHERE personId IS NULL")
+    fun getUnlabelledFaceCount(): Flow<Int>
+
+    @Query("SELECT f.id, p.uri, f.boundingBoxJson FROM faces f INNER JOIN photos p ON f.photoId = p.id ORDER BY f.id DESC LIMIT :limit")
+    fun getRecentFaces(limit: Int): Flow<List<FaceWithPhoto>>
+
+    @Query("DELETE FROM faces")
+    suspend fun deleteAllFaces()
 }
+
+data class FaceWithPhoto(
+    val id: Long,
+    val uri: String,
+    val boundingBoxJson: String?
+)

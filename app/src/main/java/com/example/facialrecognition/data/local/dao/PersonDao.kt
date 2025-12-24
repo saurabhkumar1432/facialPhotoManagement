@@ -16,6 +16,9 @@ interface PersonDao {
     @Update
     suspend fun update(person: Person)
 
+    @androidx.room.Delete
+    suspend fun delete(person: Person)
+
     @Query("SELECT * FROM people ORDER BY name ASC")
     fun getAllPeople(): Flow<List<Person>>
 

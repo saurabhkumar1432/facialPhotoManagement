@@ -1,3 +1,98 @@
 <resources>
-    <string name="app_name">FaceApp</string>
+    <string name="app_name">FaceGallery</string>
+    <string name="app_title">Smart Gallery</string>
+
+    <!-- Navigation -->
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_albums">Albums</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_gallery">Gallery</string>
+    <string name="nav_people">People</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Search & Library -->
+    <string name="title_library">Library</string>
+    <string name="title_people">People</string>
+    <string name="title_search">Search</string>
+    <string name="hint_search_people">Search people by name...</string>
+    <string name="no_people_found">No people found</string>
+    <string name="try_different_search">Try a different search term</string>
+    <string name="unlabelled_faces_format">%1$d Unlabelled Faces</string>
+    <string name="processing_background">Processing in background...</string>
+    <string name="all_people">All People</string>
+    <string name="tap_to_view">Tap to view photos</string>
+    <string name="results_format">Results (%1$d)</string>
+    <string name="selected_count_format">%1$d selected</string>
+    <string name="cancel">Cancel</string>
+    <string name="all">All</string>
+    <string name="select">Select</string>
+    <string name="no_photos_found">No photos found</string>
+    <string name="no_photos_msg">Make sure storage permission is granted and photos are being scanned</string>
+    <string name="empty_recent_photos">No recent photos</string>
+    <string name="empty_people_pets">No people detected yet</string>
+
+    <!-- Main Screen -->
+    <string name="search_desc">Search</string>
+    <string name="settings_desc">Settings</string>
+    <string name="privacy_indicator">On-Device Processing Active</string>
+    <string name="library_stats">Library Stats</string>
+    <string name="stat_photos">Photos</string>
+    <string name="stat_people">People</string>
+    <string name="stat_faces">Faces</string>
+    <string name="section_people_pets">People &amp; Pets</string>
+    <string name="section_just_added">Just Added</string>
+    <string name="sort_desc">Sort</string>
+    <string name="recent_photo_label">Recent Photo</string>
+    <string name="just_now">Just now</string>
+    <string name="view_all_photos">View All Photos</string>
+
+    <!-- Person Detail Screen -->
+    <string name="unknown_person">Unknown</string>
+    <string name="rename_person">Rename Person</string>
+    <string name="delete_person">Delete Person</string>
+    <string name="back_desc">Back</string>
+    <string name="more_options_desc">More Options</string>
+    <string name="edit_name_desc">Edit Name</string>
+    <string name="photos_count_format">%1$d Photos</string>
+    <string name="select_all">Select All</string>
+    <string name="clear_selection">Clear</string>
+    <string name="share">Share</string>
+    <string name="play_slideshow">Play</string>
+    <string name="items_count_format">%1$d items</string>
+    <string name="selected_desc">Selected</string>
+    <string name="share_intent_title">Share images to..</string>
+    <string name="dialog_name_label">Name</string>
+    <string name="dialog_save">Save</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <!-- Profile Screen -->
+    <string name="title_settings">Settings</string>
+    <string name="subtitle_smart_gallery">Facial Recognition Photo Manager</string>
+    <string name="stats_library">Library Statistics</string>
+    <string name="stats_processed">Processed Photos</string>
+    <string name="section_actions">Actions</string>
+    <string name="action_rescan">Rescan Photos</string>
+    <string name="section_preferences">Preferences</string>
+    <string name="pref_theme">Theme</string>
+    <string name="pref_theme_desc">Dark Mode</string>
+    <string name="pref_notifications">Notifications</string>
+    <string name="pref_notifications_desc">Notify when scan completes</string>
+    <string name="section_storage">Storage</string>
+    <string name="storage_face_cache">Face Data Cache</string>
+    <string name="storage_faces_format">%1$d faces stored locally</string>
+    <string name="action_clear">Clear</string>
+    <string name="section_danger">Danger Zone</string>
+    <string name="action_delete_all">Delete All Data</string>
+    <string name="section_about">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_privacy">Privacy</string>
+    <string name="about_ai">AI Processing</string>
+    <string name="privacy_notice">Your photos never leave your device. All facial recognition happens locally.</string>
+    <string name="dialog_delete_title">Delete All Data</string>
+    <string name="dialog_delete_message">Are you sure? This will delete all recognized faces and people data. Your photos will remain on your device.</string>
+    <string name="dialog_delete_confirm">Delete</string>
+    
+
 </resources>

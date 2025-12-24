@@ -1,0 +1,87 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle files
+.gradle/
+build/
+*/build/
+
+# Local configuration files
+local.properties
+*.properties.local
+
+# IntelliJ IDEA / Android Studio
+*.iml
+.idea/
+.idea
+*.jps
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build outputs and logs
+*.log
+*.tmp
+*.txt
+!README.txt
+build_*.txt
+**/build_output*.txt
+**/build_log*.txt
+**/build_result*.txt
+
+# Captures and screenshots
+/captures
+
+# External libraries
+.externalNativeBuild/
+.cxx/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (contains sensitive info)
+google-services.json
+
+# Binary files
+*.bin
+*.lock
+
+# NDK
+obj/
+
+# IntelliJ
+out/
+
+# User-specific
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Stitch folder (custom)
+stitch_welcome_screen
+
+# Build reports
+build/reports/

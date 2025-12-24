@@ -12,7 +12,7 @@ import com.example.facialrecognition.data.local.entity.Face
 import com.example.facialrecognition.data.local.entity.Person
 import com.example.facialrecognition.data.local.entity.Photo
 
-@Database(entities = [Photo::class, Face::class, Person::class], version = 1, exportSchema = false)
+@Database(entities = [Photo::class, Face::class, Person::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
@@ -29,7 +29,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "facial_recognition_db"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
