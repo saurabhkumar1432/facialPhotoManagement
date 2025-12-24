@@ -70,6 +70,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        // Auto-scan for new photos when app opens (if already onboarded)
+        val prefs = com.example.facialrecognition.data.local.AppPreferences(this)
+        if (prefs.isOnboarded && hasPhotoPermission()) {
+            triggerScan()
+        }
+        
         setContent {
             FacialPhotoManagementTheme {
                 MainAppContent(
@@ -83,6 +89,14 @@ class MainActivity : ComponentActivity() {
                     onTriggerScan = { triggerScan() }
                 )
             }
+        }
+    }
+    
+    private fun hasPhotoPermission(): Boolean {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED
         }
     }
 
