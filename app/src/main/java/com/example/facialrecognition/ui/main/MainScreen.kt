@@ -76,20 +76,14 @@ fun MainScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge)
             ) {
-                Box(
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_launcher_new),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(Dimens.AvatarSizeSmall)
                         .clip(CircleShape)
-                        .background(PrimaryBlue.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoLibrary,
-                        contentDescription = null,
-                        tint = PrimaryBlue,
-                        modifier = Modifier.size(Dimens.IconSizeMedium)
-                    )
-                }
+                )
                 Text(
                     text = stringResource(R.string.app_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),

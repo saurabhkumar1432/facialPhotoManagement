@@ -242,15 +242,20 @@ fun PersonDetailScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.weight(1f)
                             ) {
+                                val hasSelection = uiState.selectedPhotoIds.isNotEmpty()
                                 FilledTonalIconButton(
                                     onClick = { 
-                                        uiState.photos.forEach { photo ->
-                                            viewModel.toggleSelection(photo.id)
+                                        if (hasSelection) {
+                                            // Deselect all when ANY photos are selected
+                                            viewModel.deselectAll()
+                                        } else {
+                                            // Select all when nothing is selected
+                                            viewModel.selectAll()
                                         }
                                     },
                                     modifier = Modifier.size(56.dp),
                                     colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                        containerColor = if (uiState.selectedPhotoIds.isNotEmpty()) 
+                                        containerColor = if (hasSelection) 
                                             PrimaryBlue.copy(alpha = 0.2f) 
                                         else 
                                             MaterialTheme.colorScheme.surfaceVariant
@@ -258,14 +263,14 @@ fun PersonDetailScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.CheckCircle, 
-                                        contentDescription = stringResource(R.string.select_all), 
+                                        contentDescription = if (hasSelection) stringResource(R.string.deselect_all) else stringResource(R.string.select_all), 
                                         modifier = Modifier.size(24.dp),
-                                        tint = if (uiState.selectedPhotoIds.isNotEmpty()) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (hasSelection) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = if (uiState.selectedPhotoIds.isEmpty()) stringResource(R.string.select_all) else "${uiState.selectedPhotoIds.size} selected",
+                                    text = if (hasSelection) "${uiState.selectedPhotoIds.size} selected" else stringResource(R.string.select_all),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

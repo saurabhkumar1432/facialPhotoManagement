@@ -2,6 +2,21 @@
 
 This document explains how to set up and trigger production APK releases for the Facial Photo Management app.
 
+---
+
+## Changelog
+
+### v1.1.0 (December 2024)
+
+**Bug Fixes:**
+- Fixed photo viewer swiping between photos
+- Fixed deselect functionality when multiple photos are selected (previously only worked with single selection)
+
+**UI Improvements:**
+- Replaced generic icons with the app icon in homepage and settings headers
+
+---
+
 ## Prerequisites
 
 - Git installed and configured

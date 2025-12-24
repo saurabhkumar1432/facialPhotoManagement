@@ -2,9 +2,6 @@ package com.example.facialrecognition.ui.photos
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -17,17 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
-import com.example.facialrecognition.data.local.entity.Photo
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,18 +35,7 @@ fun PhotoViewerScreen(
         factory = PhotoViewerViewModel.Factory(application, source, sourceId, startPhotoId)
     )
     val uiState by viewModel.uiState.collectAsState()
-    var pagerState: androidx.compose.foundation.pager.PagerState? by remember { mutableStateOf(null) }
     
-    // Initialize PagerState once data is loaded
-    LaunchedEffect(uiState.isLoading) {
-        if (!uiState.isLoading && uiState.photos.isNotEmpty()) {
-            // We can't easily recreate PagerState with a new initialPage if it's already remembered,
-            // but since uiState.isLoading starts as true, this block runs once when data arrives.
-            // However, rememberPagerState is a Composable function.
-            // Better approach: Derived key. 
-        }
-    }
-
     if (uiState.isLoading) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = Color.White)
@@ -69,14 +50,11 @@ fun PhotoViewerScreen(
         return
     }
 
-    // Key the pager state to the photos list size or id to ensure it resets if data changes drastically (unlikely here)
-    // We pass initialPage to the remember call.
     val localPagerState = rememberPagerState(
         initialPage = uiState.initialIndex,
         pageCount = { uiState.photos.size }
     )
     
-    var showControls by remember { mutableStateOf(true) }
     var isPlaying by remember { mutableStateOf(autoPlay) }
 
     // Auto-play logic
@@ -94,120 +72,61 @@ fun PhotoViewerScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .clickable { showControls = !showControls }
     ) {
+        // Simple swipeable photo pager - no zoom
         HorizontalPager(
             state = localPagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            ZoomableImage(
-                imageUrl = uiState.photos[page].uri,
+            AsyncImage(
+                model = uiState.photos[page].uri,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize()
             )
         }
 
         // Top Bar
-        if (showControls) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .statusBarsPadding()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                // Use localPagerState.currentPage which updates as user swipes
-                Column(modifier = Modifier.weight(1f)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .background(Color.Black.copy(alpha = 0.5f))
+                .statusBarsPadding()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${localPagerState.currentPage + 1} / ${uiState.photos.size}",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                if (uiState.photos.isNotEmpty()) {
                     Text(
-                        text = "${localPagerState.currentPage + 1} / ${uiState.photos.size}",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    if (uiState.photos.isNotEmpty()) {
-                        Text(
-                            text = com.example.facialrecognition.util.DateUtils.formatDate(uiState.photos[localPagerState.currentPage].dateAdded),
-                            color = Color.White.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-                
-                // Slideshow Toggle
-                IconButton(onClick = { isPlaying = !isPlaying }) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = Color.White
+                        text = com.example.facialrecognition.util.DateUtils.formatDate(uiState.photos[localPagerState.currentPage].dateAdded),
+                        color = Color.White.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
+            }
+            
+            // Slideshow Toggle
+            IconButton(onClick = { isPlaying = !isPlaying }) {
+                Icon(
+                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    contentDescription = if (isPlaying) "Pause" else "Play",
+                    tint = Color.White
+                )
             }
         }
     }
 }
-
-@Composable
-fun ZoomableImage(
-    imageUrl: String,
-    modifier: Modifier = Modifier
-) {
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-
-    // Only enable zoom/pan transformations when the image is zoomed in
-    // This allows the HorizontalPager to receive swipe gestures when not zoomed
-    val state = rememberTransformableState { zoomChange, offsetChange, _ ->
-        val newScale = (scale * zoomChange).coerceIn(1f, 3f)
-        
-        // Only apply offset changes when zoomed in
-        if (newScale > 1f) {
-            scale = newScale
-            offset += offsetChange
-        } else {
-            scale = newScale
-            offset = Offset.Zero
-        }
-    }
-
-    // Reset zoom on double tap
-    Box(
-        modifier = modifier
-            .clipToBounds()
-            // Only apply transformable when zoomed in to allow swipe through when not zoomed
-            .then(
-                if (scale > 1f) {
-                    Modifier.transformable(state = state)
-                } else {
-                    // When not zoomed, only handle pinch gestures (multi-touch)
-                    Modifier.transformable(
-                        state = state,
-                        lockRotationOnZoomPan = true
-                    )
-                }
-            )
-    ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer(
-                    scaleX = scale,
-                    scaleY = scale,
-                    translationX = offset.x,
-                    translationY = offset.y
-                )
-        )
-    }
-}
-
-

@@ -78,20 +78,14 @@ fun ProfileScreen(
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_launcher_new),
+                        contentDescription = null,
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                         modifier = Modifier
                             .size(80.dp)
                             .clip(CircleShape)
-                            .background(PrimaryBlue.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PhotoLibrary,
-                            contentDescription = null,
-                            tint = PrimaryBlue,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.app_title),
@@ -301,7 +295,7 @@ fun ProfileScreen(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    AboutRow(label = stringResource(R.string.about_version), value = "1.0.0")
+                    AboutRow(label = stringResource(R.string.about_version), value = "1.1.0")
                     Divider(
                         modifier = Modifier.padding(vertical = 12.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)

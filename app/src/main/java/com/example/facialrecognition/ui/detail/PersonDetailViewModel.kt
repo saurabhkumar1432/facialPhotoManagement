@@ -55,6 +55,16 @@ class PersonDetailViewModel(
         }
     }
     
+    fun selectAll() {
+        _uiState.update { state ->
+            state.copy(selectedPhotoIds = state.photos.map { it.id }.toSet())
+        }
+    }
+    
+    fun deselectAll() {
+        _uiState.update { it.copy(selectedPhotoIds = emptySet()) }
+    }
+    
     fun clearSelection() {
         _uiState.update { it.copy(selectedPhotoIds = emptySet()) }
     }
