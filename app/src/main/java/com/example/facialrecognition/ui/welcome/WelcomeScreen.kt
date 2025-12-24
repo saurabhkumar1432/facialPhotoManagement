@@ -82,20 +82,15 @@ fun WelcomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
+                // App Icon using actual launcher icon
+                Image(
+                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_launcher_new),
+                    contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(CircleShape)
-                        .background(PrimaryBlue.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Face,
-                        contentDescription = null,
-                        tint = PrimaryBlue,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
                 Text(
                     text = "FaceGallery",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),

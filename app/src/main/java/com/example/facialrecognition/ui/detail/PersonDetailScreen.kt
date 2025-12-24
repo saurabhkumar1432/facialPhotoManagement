@@ -82,7 +82,8 @@ fun PersonDetailScreen(
     // Group photos by date
     val groupedPhotos = remember(uiState.photos) {
         uiState.photos.groupBy { photo ->
-            com.example.facialrecognition.util.DateUtils.formatMonthYear(photo.dateAdded * 1000L)
+            // dateAdded is already in milliseconds, no need to multiply
+            com.example.facialrecognition.util.DateUtils.formatMonthYear(photo.dateAdded)
         }
     }
 
@@ -229,71 +230,108 @@ fun PersonDetailScreen(
                             modifier = Modifier.padding(bottom = Dimens.PaddingDoubleLarge)
                         )
 
-                        // Actions
+                        // Actions - Using larger buttons with proper spacing
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 32.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Button(
-                                onClick = { 
-                                    // Select all photos
-                                    uiState.photos.forEach { photo ->
-                                        viewModel.toggleSelection(photo.id)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(40.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                shape = RoundedCornerShape(Dimens.CornerRadiusRound)
+                            // Select Button
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(Dimens.PaddingMedium))
-                                Text(if (uiState.selectedPhotoIds.isEmpty()) stringResource(R.string.select_all) else stringResource(R.string.clear_selection))
+                                FilledTonalIconButton(
+                                    onClick = { 
+                                        uiState.photos.forEach { photo ->
+                                            viewModel.toggleSelection(photo.id)
+                                        }
+                                    },
+                                    modifier = Modifier.size(56.dp),
+                                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                        containerColor = if (uiState.selectedPhotoIds.isNotEmpty()) 
+                                            PrimaryBlue.copy(alpha = 0.2f) 
+                                        else 
+                                            MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.CheckCircle, 
+                                        contentDescription = stringResource(R.string.select_all), 
+                                        modifier = Modifier.size(24.dp),
+                                        tint = if (uiState.selectedPhotoIds.isNotEmpty()) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = if (uiState.selectedPhotoIds.isEmpty()) stringResource(R.string.select_all) else "${uiState.selectedPhotoIds.size} selected",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
-                            Button(
-                                onClick = { 
-                                    if (uiState.selectedPhotoIds.isNotEmpty()) {
-                                        shareImages(context, uiState.photos, uiState.selectedPhotoIds)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(40.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = PrimaryBlue,
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(Dimens.CornerRadiusRound),
-                                enabled = uiState.selectedPhotoIds.isNotEmpty()
+                            
+                            // Share Button
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(Dimens.PaddingMedium))
-                                Text(stringResource(R.string.share))
+                                FilledTonalIconButton(
+                                    onClick = { 
+                                        if (uiState.selectedPhotoIds.isNotEmpty()) {
+                                            shareImages(context, uiState.photos, uiState.selectedPhotoIds)
+                                        }
+                                    },
+                                    modifier = Modifier.size(56.dp),
+                                    enabled = uiState.selectedPhotoIds.isNotEmpty(),
+                                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                        containerColor = PrimaryBlue,
+                                        contentColor = Color.White,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Share, 
+                                        contentDescription = stringResource(R.string.share), 
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(R.string.share),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
-                            Button(
-                                onClick = { 
-                                    if (uiState.photos.isNotEmpty()) {
-                                        onPlayClick()
-                                    }
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(40.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                shape = RoundedCornerShape(Dimens.CornerRadiusRound)
+                            
+                            // Play Button
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(Dimens.PaddingMedium))
-                                Text(stringResource(R.string.play_slideshow))
+                                FilledTonalIconButton(
+                                    onClick = { 
+                                        if (uiState.photos.isNotEmpty()) {
+                                            onPlayClick()
+                                        }
+                                    },
+                                    modifier = Modifier.size(56.dp),
+                                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.PlayArrow, 
+                                        contentDescription = stringResource(R.string.play_slideshow), 
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(R.string.play_slideshow),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
