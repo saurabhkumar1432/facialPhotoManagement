@@ -38,7 +38,11 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+            // Only apply signing config if keystore is available (CI environment)
+            val keystorePath = System.getenv("KEYSTORE_PATH")
+            if (keystorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -81,6 +85,9 @@ dependencies {
     
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.6")
+
+    // Fragment (required for Activity Result APIs)
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 
     // Room
     val room_version = "2.6.1"
